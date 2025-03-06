@@ -1,26 +1,44 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id "com.github.ben-manes.versions" version "0.51.0"
+    id "com.github.ben-manes.versions" version "0.52.0"
 }
 
 group = 'de.longri'
-version = '1.0'
+version = '1.1'
 
 repositories {
     mavenCentral()
 }
-
+ext {
+    junitVersion = '5.11.4'
+}
 dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.1.0-alpha1'
 
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
 }
 
 test {
     useJUnitPlatform()
 }
+dependencyUpdates {
+    resolutionStrategy {
+        componentSelection {
+            all {
+                // Schließt alle Abhängigkeiten aus, die mit 'org.openjfx' (JavaFX) beginnen
+                if (candidate.group == 'org.openjfx') {
+                    reject('JavaFX dependencies are excluded')
+                }
+                if (candidate.group == 'org.junit.jupiter') {
+                    reject('JUnit dependencies are excluded')
+                }
+            }
+        }
+    }
+}
+
 
 if (file('gradle.properties.local').exists()) {
     def props = new Properties()
